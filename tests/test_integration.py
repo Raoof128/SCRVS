@@ -224,7 +224,7 @@ class TestIntegration(unittest.TestCase):
             # Verify JSON is valid
             import json
 
-            with open(json_path, "r") as f:
+            with open(json_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
                 self.assertIn("findings", data)
                 self.assertEqual(len(data["findings"]), 1)

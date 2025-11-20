@@ -42,7 +42,7 @@ class TestReporter(unittest.TestCase):
             self.reporter.generate_json(output_path)
             self.assertTrue(os.path.exists(output_path))
 
-            with open(output_path, "r") as f:
+            with open(output_path, "r", encoding="utf-8") as f:
                 report = json.load(f)
 
             self.assertEqual(report["file"], "test.sol")
@@ -59,7 +59,7 @@ class TestReporter(unittest.TestCase):
             self.reporter.generate_csv(output_path)
             self.assertTrue(os.path.exists(output_path))
 
-            with open(output_path, "r") as f:
+            with open(output_path, "r", encoding="utf-8") as f:
                 content = f.read()
                 self.assertIn("Severity", content)
                 self.assertIn("CRITICAL", content)
@@ -74,7 +74,7 @@ class TestReporter(unittest.TestCase):
             self.reporter.generate_markdown(output_path)
             self.assertTrue(os.path.exists(output_path))
 
-            with open(output_path, "r") as f:
+            with open(output_path, "r", encoding="utf-8") as f:
                 content = f.read()
                 self.assertIn("# Smart Contract Security Audit Report", content)
                 self.assertIn("CRITICAL", content)
