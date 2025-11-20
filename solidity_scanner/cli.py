@@ -23,6 +23,79 @@ setup_logging(level="INFO")
 logger = get_logger(__name__)
 
 
+def _read_source_file(file_path: Path) -> str:
+    """
+    Read source file with error handling.
+
+    Args:
+        file_path: Path to the Solidity file
+
+    Returns:
+        Source code content
+
+    Raises:
+        FileNotFoundError: If file does not exist
+        ValueError: If file cannot be read
+    """
+    try:
+        source_code = read_file_content(file_path)
+        if not source_code:
+            logger.error(f"Failed to read file: {file_path}")
+            raise ValueError(f"Empty file: {file_path}")
+        return source_code
+    except (FileNotFoundError, PermissionError, ValueError):
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error reading file {file_path}: {e}", exc_info=True)
+        raise ValueError(f"Error reading file: {e}") from e
+
+
+def _run_detectors(contracts: List, source_code: str, file_path: str) -> List:
+    """
+    Run all detectors on contracts.
+
+    Args:
+        contracts: List of parsed contracts
+        source_code: Source code content
+        file_path: Path to the file
+
+    Returns:
+        List of findings from all detectors
+    """
+    all_findings = []
+    detectors = [
+        ReentrancyDetector(),
+        ValidationDetector(),
+        BadPatternsDetector(),
+        InsecureCallsDetector(),
+    ]
+
+    for detector in detectors:
+        findings = detector.detect(contracts, source_code, file_path)
+        all_findings.extend(findings)
+
+    return all_findings
+
+
+def _generate_reports(reporter: Reporter, base_name: str, output_format: str) -> None:
+    """
+    Generate reports based on output format.
+
+    Args:
+        reporter: Reporter instance
+        base_name: Base name for output files
+        output_format: Output format (json, csv, markdown, or None for all)
+    """
+    if output_format == "json" or output_format is None:
+        reporter.generate_json(f"{base_name}_report.json")
+
+    if output_format == "csv" or output_format is None:
+        reporter.generate_csv(f"{base_name}_findings.csv")
+
+    if output_format == "markdown" or output_format is None:
+        reporter.generate_markdown(f"{base_name}_security_audit.md")
+
+
 def scan_file(file_path: Path, output_format: str = None, critical_only: bool = False) -> int:
     """
     Scan a single Solidity file.
@@ -40,15 +113,9 @@ def scan_file(file_path: Path, output_format: str = None, critical_only: bool = 
         ValueError: If file cannot be read or parsed
     """
     try:
-        source_code = read_file_content(file_path)
-        if not source_code:
-            logger.error(f"Failed to read file: {file_path}")
-            return 1
+        source_code = _read_source_file(file_path)
     except (FileNotFoundError, PermissionError, ValueError) as e:
         logger.error(f"Error reading file {file_path}: {e}")
-        return 1
-    except Exception as e:
-        logger.error(f"Unexpected error reading file {file_path}: {e}", exc_info=True)
         return 1
 
     # Parse contract
@@ -60,18 +127,7 @@ def scan_file(file_path: Path, output_format: str = None, critical_only: bool = 
         return 0
 
     # Run detectors
-    all_findings = []
-
-    detectors = [
-        ReentrancyDetector(),
-        ValidationDetector(),
-        BadPatternsDetector(),
-        InsecureCallsDetector(),
-    ]
-
-    for detector in detectors:
-        findings = detector.detect(contracts, source_code, str(file_path))
-        all_findings.extend(findings)
+    all_findings = _run_detectors(contracts, source_code, str(file_path))
 
     # Generate reports
     reporter = Reporter(all_findings, str(file_path))
@@ -82,15 +138,7 @@ def scan_file(file_path: Path, output_format: str = None, critical_only: bool = 
 
     # Generate file outputs
     base_name = file_path.stem
-
-    if output_format == "json" or output_format is None:
-        reporter.generate_json(f"{base_name}_report.json")
-
-    if output_format == "csv" or output_format is None:
-        reporter.generate_csv(f"{base_name}_findings.csv")
-
-    if output_format == "markdown" or output_format is None:
-        reporter.generate_markdown(f"{base_name}_security_audit.md")
+    _generate_reports(reporter, base_name, output_format)
 
     # Return exit code
     return reporter.get_exit_code(critical_only=critical_only)

@@ -127,6 +127,100 @@ class SolidityParser:
                     if in_contract and brace_count == 0:
                         break
 
+    def _parse_modifiers_from_signature(self, line: str) -> List[str]:
+        """
+        Parse modifiers from function signature line.
+
+        Args:
+            line: Function signature line
+
+        Returns:
+            List of modifier names
+        """
+        modifiers = []
+        paren_end = line.find(")")
+        if paren_end > 0:
+            after_sig = line[paren_end + 1 :]
+            after_sig = re.sub(
+                r"\b(public|private|internal|external|payable|view|pure|returns)\b",
+                "",
+                after_sig,
+            )
+            before_brace = after_sig.split("{")[0]
+            modifier_matches = re.findall(r"\b([a-zA-Z_][a-zA-Z0-9_]*)\b", before_brace)
+            excluded = {
+                "function",
+                "public",
+                "private",
+                "internal",
+                "external",
+                "payable",
+                "view",
+                "pure",
+                "returns",
+            }
+            for mod in modifier_matches:
+                if mod and mod not in excluded:
+                    modifiers.append(mod)
+        return modifiers
+
+    def _extract_function_properties(self, line: str) -> tuple:
+        """
+        Extract function properties from signature line.
+
+        Args:
+            line: Function signature line
+
+        Returns:
+            Tuple of (visibility, is_payable, is_view, is_pure)
+        """
+        is_payable = "payable" in line
+        is_view = "view" in line
+        is_pure = "pure" in line
+
+        visibility = "public"
+        for vis in ["public", "private", "internal", "external"]:
+            if vis in line:
+                visibility = vis
+                break
+
+        return visibility, is_payable, is_view, is_pure
+
+    def _extract_function_body(
+        self, contract_lines: List[str], start_idx: int, contract_line_start: int
+    ) -> tuple:
+        """
+        Extract function body by tracking braces.
+
+        Args:
+            contract_lines: Lines of the contract
+            start_idx: Starting index in contract_lines
+            contract_line_start: Starting line number of contract
+
+        Returns:
+            Tuple of (func_body, func_end_line) or (None, None) if not found
+        """
+        brace_count = 0
+        func_body_lines = []
+        in_function = False
+
+        for j, func_line in enumerate(contract_lines[start_idx:], start=start_idx):
+            func_body_lines.append(func_line)
+            for char in func_line:
+                if char == "{":
+                    brace_count += 1
+                    in_function = True
+                elif char == "}":
+                    brace_count -= 1
+                    if in_function and brace_count == 0:
+                        func_end_line = contract_line_start + j
+                        func_body = "\n".join(func_body_lines)
+                        return func_body, func_end_line
+            if in_function and brace_count == 0:
+                break
+
+        return None, None
+
     def _extract_functions(self, contract: ContractInfo) -> None:
         """Extract functions from a contract."""
         contract_lines = self.lines[contract.line_start - 1 : contract.line_end]
@@ -146,84 +240,32 @@ class SolidityParser:
                 if func_name == contract.name or func_name == "constructor":
                     continue
 
-                # Extract function details
-                is_payable = "payable" in line
-                is_view = "view" in line
-                is_pure = "pure" in line
+                # Extract function properties
+                visibility, is_payable, is_view, is_pure = self._extract_function_properties(line)
 
-                # Extract visibility
-                visibility = "public"
-                for vis in ["public", "private", "internal", "external"]:
-                    if vis in line:
-                        visibility = vis
-                        break
-
-                # Extract modifiers - look for identifiers after visibility/keywords but before {
-                # Pattern: after function signature, find identifiers that aren't keywords
-                modifiers = []
-                # Find the position after the closing parenthesis
-                paren_end = line.find(")")
-                if paren_end > 0:
-                    # Extract the part after the function signature
-                    after_sig = line[paren_end + 1 :]
-                    # Remove visibility and state mutability keywords
-                    after_sig = re.sub(
-                        r"\b(public|private|internal|external|payable|view|pure|returns)\b",
-                        "",
-                        after_sig,
-                    )
-                    # Find identifiers before {
-                    before_brace = after_sig.split("{")[0]
-                    # Extract modifier names (identifiers)
-                    modifier_matches = re.findall(r"\b([a-zA-Z_][a-zA-Z0-9_]*)\b", before_brace)
-                    for mod in modifier_matches:
-                        if mod and mod not in [
-                            "function",
-                            "public",
-                            "private",
-                            "internal",
-                            "external",
-                            "payable",
-                            "view",
-                            "pure",
-                            "returns",
-                        ]:
-                            modifiers.append(mod)
+                # Extract modifiers
+                modifiers = self._parse_modifiers_from_signature(line)
 
                 # Find function body
-                brace_count = 0
                 start_idx = i - contract.line_start
                 func_start_line = i
-                func_body_lines = []
-                in_function = False
+                func_body, func_end_line = self._extract_function_body(
+                    contract_lines, start_idx, contract.line_start
+                )
 
-                for j, func_line in enumerate(contract_lines[start_idx:], start=start_idx):
-                    func_body_lines.append(func_line)
-                    for char in func_line:
-                        if char == "{":
-                            brace_count += 1
-                            in_function = True
-                        elif char == "}":
-                            brace_count -= 1
-                            if in_function and brace_count == 0:
-                                func_end_line = contract.line_start + j
-                                func_body = "\n".join(func_body_lines)
-
-                                func = FunctionNode(
-                                    name=func_name,
-                                    visibility=visibility,
-                                    is_payable=is_payable,
-                                    is_view=is_view,
-                                    is_pure=is_pure,
-                                    modifiers=modifiers,
-                                    line_start=func_start_line,
-                                    line_end=func_end_line,
-                                    body=func_body,
-                                )
-                                contract.functions.append(func)
-                                break
-                    if in_function and brace_count == 0:
-                        break
+                if func_body and func_end_line:
+                    func = FunctionNode(
+                        name=func_name,
+                        visibility=visibility,
+                        is_payable=is_payable,
+                        is_view=is_view,
+                        is_pure=is_pure,
+                        modifiers=modifiers,
+                        line_start=func_start_line,
+                        line_end=func_end_line,
+                        body=func_body,
+                    )
+                    contract.functions.append(func)
 
     def _extract_state_variables(self, contract: ContractInfo) -> None:
         """Extract state variables from a contract."""

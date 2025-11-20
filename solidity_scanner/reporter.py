@@ -163,23 +163,19 @@ class Reporter:
 
         logger.info(f"CSV report saved to {output_path}")
 
-    def generate_markdown(self, output_path: str) -> None:
-        """
-        Generate professional Markdown audit report.
-
-        Args:
-            output_path: Path to output Markdown file
-        """
+    def _generate_markdown_header(self) -> List[str]:
+        """Generate markdown header section."""
         lines = []
-
-        # Header
         lines.append("# Smart Contract Security Audit Report")
         lines.append("")
         lines.append(f"**File:** `{self.file_path}`")
         lines.append(f"**Scan Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         lines.append("")
+        return lines
 
-        # Executive Summary
+    def _generate_executive_summary(self) -> List[str]:
+        """Generate executive summary section."""
+        lines = []
         lines.append("## Executive Summary")
         lines.append("")
 
@@ -214,7 +210,11 @@ class Reporter:
             )
             lines.append("")
 
-        # Findings by Severity
+        return lines
+
+    def _generate_findings_section(self) -> List[str]:
+        """Generate findings section grouped by severity."""
+        lines = []
         for severity in self.severity_order:
             severity_findings = [f for f in self.findings if f.severity == severity]
             if not severity_findings:
@@ -258,7 +258,11 @@ class Reporter:
                 lines.append("---")
                 lines.append("")
 
-        # Real-World Examples Section
+        return lines
+
+    def _generate_real_world_examples(self) -> List[str]:
+        """Generate real-world examples section."""
+        lines = []
         lines.append("## Real-World Reentrancy Attacks")
         lines.append("")
         lines.append("### The DAO Hack (2016)")
@@ -288,8 +292,11 @@ class Reporter:
         lines.append("involved unprotected functions and delegatecall misuse, resulting in")
         lines.append("$30 million being frozen.")
         lines.append("")
+        return lines
 
-        # Recommendations Section
+    def _generate_recommendations(self) -> List[str]:
+        """Generate recommendations section."""
+        lines = []
         lines.append("## General Recommendations")
         lines.append("")
         lines.append(
@@ -309,6 +316,21 @@ class Reporter:
         lines.append("7. **Testing**: Write comprehensive tests, including edge cases")
         lines.append("8. **Events**: Emit events for important state changes")
         lines.append("")
+        return lines
+
+    def generate_markdown(self, output_path: str) -> None:
+        """
+        Generate professional Markdown audit report.
+
+        Args:
+            output_path: Path to output Markdown file
+        """
+        lines = []
+        lines.extend(self._generate_markdown_header())
+        lines.extend(self._generate_executive_summary())
+        lines.extend(self._generate_findings_section())
+        lines.extend(self._generate_real_world_examples())
+        lines.extend(self._generate_recommendations())
 
         # Footer
         lines.append("---")
