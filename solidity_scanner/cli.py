@@ -23,9 +23,7 @@ setup_logging(level="INFO")
 logger = get_logger(__name__)
 
 
-def scan_file(
-    file_path: Path, output_format: str = None, critical_only: bool = False
-) -> int:
+def scan_file(file_path: Path, output_format: str = None, critical_only: bool = False) -> int:
     """
     Scan a single Solidity file.
 
