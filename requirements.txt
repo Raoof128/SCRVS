@@ -1,0 +1,14 @@
+# Solidity Vulnerability Scanner Requirements
+#
+# Core dependencies: None (uses only Python standard library)
+#
+# For development dependencies, see pyproject.toml [project.optional-dependencies.dev]
+#
+# Note: This scanner uses regex-based parsing. For production use,
+# consider integrating with solidity-parser-py or py-solc-x for
+# more accurate AST parsing.
+#
+# Optional: For enhanced parsing (future improvements)
+# solidity-parser-py>=0.1.0
+# py-solc-x>=1.1.0
+
