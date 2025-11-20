@@ -79,7 +79,8 @@ class BadPatternsDetector(BaseDetector):
                     reference=(
                         "Real-world examples:\n"
                         "- Fomo3D: Predictable randomness exploited\n"
-                        "https://consensys.github.io/smart-contract-best-practices/development-recommendations/solidity-specific/randomness/"
+                        "https://consensys.github.io/smart-contract-best-practices/"
+                        "development-recommendations/solidity-specific/randomness/"
                     ),
                 )
 
@@ -121,7 +122,8 @@ class BadPatternsDetector(BaseDetector):
                     reference=(
                         "Real-world examples:\n"
                         "- Parity Wallet Hack: Unprotected init function\n"
-                        "https://consensys.github.io/smart-contract-best-practices/development-recommendations/general/external-calls/"
+                        "https://consensys.github.io/smart-contract-best-practices/"
+                        "development-recommendations/general/external-calls/"
                     ),
                 )
 
@@ -156,7 +158,10 @@ class BadPatternsDetector(BaseDetector):
                         "event Transfer(address indexed from, address indexed to, uint256 value);\n"
                         "emit Transfer(msg.sender, recipient, amount);"
                     ),
-                    reference="https://consensys.github.io/smart-contract-best-practices/development-recommendations/general/events/",
+                    reference=(
+                        "https://consensys.github.io/smart-contract-best-practices/"
+                        "development-recommendations/general/events/"
+                    ),
                 )
 
     def _check_tx_origin(self, source_code: str, file_path: str) -> None:
@@ -173,9 +178,11 @@ class BadPatternsDetector(BaseDetector):
                     severity="HIGH",
                     title="Use of tx.origin",
                     description=(
-                        "tx.origin is used for authorization. This is vulnerable to phishing attacks. "
-                        "An attacker can trick a user into calling a malicious contract, which then "
-                        "calls your contract. tx.origin will be the user's address, not the attacker's."
+                        "tx.origin is used for authorization. "
+                        "This is vulnerable to phishing attacks. "
+                        "An attacker can trick a user into calling a malicious contract, "
+                        "which then calls your contract. "
+                        "tx.origin will be the user's address, not the attacker's."
                     ),
                     file_path=file_path,
                     line_number=i,
@@ -188,6 +195,7 @@ class BadPatternsDetector(BaseDetector):
                     reference=(
                         "Real-world examples:\n"
                         "- Multiple phishing attacks exploiting tx.origin\n"
-                        "https://consensys.github.io/smart-contract-best-practices/development-recommendations/solidity-specific/tx-origin/"
+                        "https://consensys.github.io/smart-contract-best-practices/"
+                        "development-recommendations/solidity-specific/tx-origin/"
                     ),
                 )

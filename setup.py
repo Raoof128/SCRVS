@@ -3,9 +3,15 @@
 from setuptools import setup, find_packages
 from pathlib import Path
 
-# Read README
+# Read README with explicit UTF-8 encoding for Windows compatibility
 readme_file = Path(__file__).parent / "README.md"
-long_description = readme_file.read_text() if readme_file.exists() else ""
+if readme_file.exists():
+    try:
+        long_description = readme_file.read_text(encoding="utf-8")
+    except Exception:
+        long_description = ""
+else:
+    long_description = ""
 
 setup(
     name="solidity-scanner",

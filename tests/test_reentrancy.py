@@ -1,7 +1,6 @@
 """Tests for reentrancy detector."""
 
 import unittest
-from pathlib import Path
 
 from solidity_scanner.detectors.reentrancy import ReentrancyDetector
 from solidity_scanner.parser import SolidityParser
@@ -14,10 +13,10 @@ class TestReentrancyDetector(unittest.TestCase):
         """Test detection of reentrancy vulnerability."""
         source = """
         pragma solidity ^0.7.0;
-        
+
         contract Vulnerable {
             mapping(address => uint256) public balances;
-            
+
             function withdraw(uint256 amount) public {
                 require(balances[msg.sender] >= amount);
                 msg.sender.call{value: amount}("");
@@ -40,12 +39,12 @@ class TestReentrancyDetector(unittest.TestCase):
         """Test detection of missing reentrancy guard."""
         source = """
         pragma solidity ^0.7.0;
-        
+
         contract Test {
             modifier nonReentrant() {
                 _;
             }
-            
+
             function withdraw() public {
                 msg.sender.call{value: 100}("");
             }
@@ -66,12 +65,12 @@ class TestReentrancyDetector(unittest.TestCase):
         """Test detection of deprecated call patterns."""
         source = """
         pragma solidity ^0.7.0;
-        
+
         contract Test {
             function send() public {
                 msg.sender.send(100);
             }
-            
+
             function transfer() public {
                 msg.sender.transfer(100);
             }
@@ -92,14 +91,14 @@ class TestReentrancyDetector(unittest.TestCase):
         """Test that safe contract doesn't trigger false positives."""
         source = """
         pragma solidity ^0.8.0;
-        
+
         contract Safe {
             mapping(address => uint256) public balances;
-            
+
             modifier nonReentrant() {
                 _;
             }
-            
+
             function withdraw(uint256 amount) public nonReentrant {
                 require(balances[msg.sender] >= amount);
                 balances[msg.sender] -= amount;
@@ -112,12 +111,11 @@ class TestReentrancyDetector(unittest.TestCase):
         contracts = parser.parse()
 
         detector = ReentrancyDetector()
-        findings = detector.detect(contracts, source, "test.sol")
+        detector.detect(contracts, source, "test.sol")
 
         # Should have fewer findings (CEI violation might still be detected
         # depending on implementation, but guard should be present)
-        critical_findings = [f for f in findings if f.severity == "CRITICAL"]
-        # Note: This test may need adjustment based on actual detection logic
+        # Note: This test verifies the detector runs without errors
 
 
 if __name__ == "__main__":

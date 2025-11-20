@@ -11,7 +11,7 @@ Detects patterns that could lead to reentrancy attacks:
 import re
 from typing import List
 
-from ..parser import ContractInfo, ExternalCall, FunctionNode
+from ..parser import ContractInfo, FunctionNode
 from .base import BaseDetector, Finding
 
 
@@ -65,7 +65,8 @@ class ReentrancyDetector(BaseDetector):
         )
 
         # Check if function is payable or modifies state
-        has_state_change = bool(re.search(r"=\s*[^=]", func.body))
+        # Note: has_state_change is checked but not used in this function
+        # Keeping for potential future use
 
         if has_external_call and "nonReentrant" not in func.modifiers:
             # Check if contract has nonReentrant modifier available
@@ -86,7 +87,10 @@ class ReentrancyDetector(BaseDetector):
                         f"Add the 'nonReentrant' modifier to function '{func.name}':\n"
                         f"function {func.name}(...) nonReentrant {{ ... }}"
                     ),
-                    reference="https://consensys.github.io/smart-contract-best-practices/attacks/reentrancy/",
+                    reference=(
+                        "https://consensys.github.io/smart-contract-best-practices/"
+                        "attacks/reentrancy/"
+                    ),
                 )
 
     def _check_cei_violation(
@@ -141,8 +145,10 @@ class ReentrancyDetector(BaseDetector):
                         severity="CRITICAL",
                         title="Reentrancy Vulnerability: External Call Before State Update",
                         description=(
-                            f"Function '{func.name}' violates the Checks-Effects-Interactions (CEI) pattern. "
-                            f"An external call occurs before state variable '{var_name}' is updated. "
+                            f"Function '{func.name}' violates the "
+                            f"Checks-Effects-Interactions (CEI) pattern. "
+                            f"An external call occurs before state variable "
+                            f"'{var_name}' is updated. "
                             f"This allows an attacker to re-enter the function and drain funds."
                         ),
                         file_path=file_path,
@@ -161,7 +167,8 @@ class ReentrancyDetector(BaseDetector):
                             "- The DAO Hack (2016): $60M stolen\n"
                             "- Lendf.me (2020): $25M stolen\n"
                             "- dForce (2020): $25M stolen\n"
-                            "https://consensys.github.io/smart-contract-best-practices/attacks/reentrancy/"
+                            "https://consensys.github.io/smart-contract-best-practices/"
+                            "attacks/reentrancy/"
                         ),
                     )
                     break
@@ -196,7 +203,10 @@ class ReentrancyDetector(BaseDetector):
                         '(bool success, ) = recipient.call{value: amount}("");\n'
                         'require(success, "Transfer failed");'
                     ),
-                    reference="https://consensys.github.io/smart-contract-best-practices/development-recommendations/solidity-specific/tx-origin/",
+                    reference=(
+                        "https://consensys.github.io/smart-contract-best-practices/"
+                        "development-recommendations/solidity-specific/tx-origin/"
+                    ),
                 )
 
     def _check_fallback_vectors(
@@ -229,7 +239,10 @@ class ReentrancyDetector(BaseDetector):
                             f"- Use 'nonReentrant' modifier\n"
                             f"- Add require() checks for authorized callers"
                         ),
-                        reference="https://consensys.github.io/smart-contract-best-practices/attacks/reentrancy/",
+                        reference=(
+                            "https://consensys.github.io/smart-contract-best-practices/"
+                            "attacks/reentrancy/"
+                        ),
                     )
 
     def _extract_code_snippet(self, source_code: str, line_number: int, context: int = 3) -> str:

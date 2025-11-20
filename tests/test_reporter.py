@@ -3,7 +3,6 @@
 import json
 import os
 import unittest
-from pathlib import Path
 
 from solidity_scanner.detectors.base import Finding
 from solidity_scanner.reporter import Reporter

@@ -79,7 +79,10 @@ class ValidationDetector(BaseDetector):
                     f"Add require() statements to validate inputs in '{func.name}':\n"
                     'require(condition, "Error message");'
                 ),
-                reference="https://consensys.github.io/smart-contract-best-practices/development-recommendations/gas-optimization/",
+                reference=(
+                    "https://consensys.github.io/smart-contract-best-practices/"
+                    "development-recommendations/gas-optimization/"
+                ),
             )
 
     def _check_unsafe_arithmetic(
@@ -95,7 +98,7 @@ class ValidationDetector(BaseDetector):
                 major, minor = map(int, version.split(".")[:2])
                 if major > 0 or (major == 0 and minor >= 8):
                     return  # Safe arithmetic in 0.8+
-            except:
+            except (ValueError, IndexError):
                 pass
 
         # Look for arithmetic operations
@@ -117,8 +120,10 @@ class ValidationDetector(BaseDetector):
                         severity="MEDIUM",
                         title=f"Potential Integer Overflow/Underflow: {op_type.title()}",
                         description=(
-                            f"Function '{func.name}' performs {op_type} operation without overflow checks. "
-                            f"In Solidity < 0.8.0, arithmetic operations can overflow/underflow silently."
+                            f"Function '{func.name}' performs {op_type} operation "
+                            f"without overflow checks. "
+                            f"In Solidity < 0.8.0, arithmetic operations can "
+                            f"overflow/underflow silently."
                         ),
                         file_path=file_path,
                         line_number=line_num,
@@ -128,7 +133,11 @@ class ValidationDetector(BaseDetector):
                             "// Solidity >= 0.8.0 has built-in overflow protection\n"
                             "pragma solidity ^0.8.0;"
                         ),
-                        reference="https://consensys.github.io/smart-contract-best-practices/development-recommendations/solidity-specific/integer-arithmetic/",
+                        reference=(
+                            "https://consensys.github.io/smart-contract-best-practices/"
+                            "development-recommendations/solidity-specific/"
+                            "integer-arithmetic/"
+                        ),
                     )
                     break
 
@@ -162,5 +171,8 @@ class ValidationDetector(BaseDetector):
                         "address public constant ADMIN = 0x...; // or\n"
                         "constructor(address _admin) { admin = _admin; }"
                     ),
-                    reference="https://consensys.github.io/smart-contract-best-practices/development-recommendations/general/external-calls/",
+                    reference=(
+                        "https://consensys.github.io/smart-contract-best-practices/"
+                        "development-recommendations/general/external-calls/"
+                    ),
                 )

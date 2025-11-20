@@ -1,9 +1,8 @@
 """Tests for Solidity parser."""
 
 import unittest
-from pathlib import Path
 
-from solidity_scanner.parser import ContractInfo, FunctionNode, SolidityParser
+from solidity_scanner.parser import SolidityParser
 
 
 class TestParser(unittest.TestCase):
@@ -13,10 +12,10 @@ class TestParser(unittest.TestCase):
         """Test parsing a simple contract."""
         source = """
         pragma solidity ^0.8.0;
-        
+
         contract TestContract {
             uint256 public value;
-            
+
             function setValue(uint256 _value) public {
                 value = _value;
             }
@@ -85,7 +84,7 @@ class TestParser(unittest.TestCase):
         source = """
         contract Test {
             uint256 public balance;
-            
+
             function setBalance(uint256 amount) public {
                 balance = amount;
             }

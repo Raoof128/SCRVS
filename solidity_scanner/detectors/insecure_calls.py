@@ -52,8 +52,9 @@ class InsecureCallsDetector(BaseDetector):
                 severity = "CRITICAL"
                 description = (
                     f"Function '{func.name}' uses delegatecall with user-controlled input. "
-                    f"This is extremely dangerous as it allows an attacker to execute arbitrary code "
-                    f"in the context of your contract, potentially taking full control."
+                    f"This is extremely dangerous as it allows an attacker to "
+                    f"execute arbitrary code in the context of your contract, "
+                    f"potentially taking full control."
                 )
             else:
                 severity = "HIGH"
@@ -80,7 +81,8 @@ class InsecureCallsDetector(BaseDetector):
                     "Real-world examples:\n"
                     "- Parity Wallet Hack (2017): $30M frozen due to delegatecall bug\n"
                     "- Multiple exploits involving delegatecall\n"
-                    "https://consensys.github.io/smart-contract-best-practices/development-recommendations/solidity-specific/delegatecall/"
+                    "https://consensys.github.io/smart-contract-best-practices/"
+                    "development-recommendations/solidity-specific/delegatecall/"
                 ),
             )
 
@@ -113,8 +115,8 @@ class InsecureCallsDetector(BaseDetector):
                         title="Unchecked Return Value from External Call",
                         description=(
                             f"Function '{func.name}' makes an external call but does not check "
-                            f"the return value. If the call fails, execution continues, which could "
-                            f"lead to unexpected behavior."
+                            f"the return value. If the call fails, execution continues, "
+                            f"which could lead to unexpected behavior."
                         ),
                         file_path=file_path,
                         line_number=call_line,
@@ -124,5 +126,8 @@ class InsecureCallsDetector(BaseDetector):
                             '(bool success, bytes memory data) = target.call{value: amount}("");\n'
                             'require(success, "Call failed");'
                         ),
-                        reference="https://consensys.github.io/smart-contract-best-practices/development-recommendations/general/external-calls/",
+                        reference=(
+                            "https://consensys.github.io/smart-contract-best-practices/"
+                            "development-recommendations/general/external-calls/"
+                        ),
                     )

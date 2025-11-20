@@ -3,14 +3,10 @@
 import unittest
 from pathlib import Path
 
-from solidity_scanner.detectors import (
-    BadPatternsDetector,
-    ReentrancyDetector,
-    ValidationDetector,
-)
+from solidity_scanner.detectors import ReentrancyDetector
 from solidity_scanner.parser import SolidityParser
 from solidity_scanner.reporter import Reporter
-from solidity_scanner.utils import find_solidity_files, read_file_content
+from solidity_scanner.utils import find_solidity_files
 
 
 class TestEdgeCases(unittest.TestCase):
@@ -20,7 +16,7 @@ class TestEdgeCases(unittest.TestCase):
         """Test parsing empty contract."""
         source = """
         pragma solidity ^0.8.0;
-        
+
         contract Empty {
         }
         """
@@ -35,7 +31,7 @@ class TestEdgeCases(unittest.TestCase):
         """Test contract with only state variables."""
         source = """
         pragma solidity ^0.8.0;
-        
+
         contract Storage {
             uint256 public value;
             address public owner;
@@ -52,11 +48,11 @@ class TestEdgeCases(unittest.TestCase):
         """Test file with multiple contracts."""
         source = """
         pragma solidity ^0.8.0;
-        
+
         contract A {
             function test() public {}
         }
-        
+
         contract B {
             function test() public {}
         }
@@ -71,7 +67,7 @@ class TestEdgeCases(unittest.TestCase):
         """Test contract with nested braces."""
         source = """
         pragma solidity ^0.8.0;
-        
+
         contract Test {
             function test() public {
                 if (true) {
@@ -93,7 +89,7 @@ class TestEdgeCases(unittest.TestCase):
         """Test code with various comment styles."""
         source = """
         pragma solidity ^0.8.0;
-        
+
         contract Test {
             // Single line comment
             function test() public {
@@ -142,8 +138,6 @@ class TestEdgeCases(unittest.TestCase):
 
     def test_empty_findings_report(self):
         """Test reporter with empty findings list."""
-        from solidity_scanner.detectors.base import Finding
-
         findings = []
         reporter = Reporter(findings, "test.sol")
 
@@ -167,7 +161,6 @@ class TestEdgeCases(unittest.TestCase):
 
     def test_find_solidity_files_empty_directory(self):
         """Test finding files in empty directory."""
-        import os
         import tempfile
 
         with tempfile.TemporaryDirectory() as tmpdir:

@@ -8,7 +8,7 @@ import logging
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -130,10 +130,12 @@ class SolidityParser:
     def _extract_functions(self, contract: ContractInfo) -> None:
         """Extract functions from a contract."""
         contract_lines = self.lines[contract.line_start - 1 : contract.line_end]
-        contract_text = "\n".join(contract_lines)
 
         # Pattern: function name(...) visibility modifiers { ... }
-        function_pattern = r"function\s+(\w+)\s*\([^)]*\)\s*(?:public|private|internal|external)?\s*(?:payable|view|pure)?\s*(?:returns\s*\([^)]*\))?\s*(?:[^{]*)?\{"
+        function_pattern = (
+            r"function\s+(\w+)\s*\([^)]*\)\s*(?:public|private|internal|external)?"
+            r"\s*(?:payable|view|pure)?\s*(?:returns\s*\([^)]*\))?\s*(?:[^{]*)?\{"
+        )
 
         for i, line in enumerate(contract_lines, start=contract.line_start):
             match = re.search(function_pattern, line)

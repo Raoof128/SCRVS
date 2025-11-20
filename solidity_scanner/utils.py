@@ -69,13 +69,13 @@ def read_file_content(file_path: Path) -> Optional[str]:
             logger.debug(f"Successfully read {len(content)} characters from {file_path}")
             return content
 
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         logger.error(f"File not found: {file_path}")
         raise
-    except PermissionError as e:
+    except PermissionError:
         logger.error(f"Permission denied reading file: {file_path}")
         raise
-    except UnicodeDecodeError as e:
+    except UnicodeDecodeError:
         logger.error(f"Unable to decode file as UTF-8: {file_path}")
         raise
     except Exception as e:

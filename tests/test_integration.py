@@ -14,7 +14,7 @@ from solidity_scanner.detectors import (
 )
 from solidity_scanner.parser import SolidityParser
 from solidity_scanner.reporter import Reporter
-from solidity_scanner.utils import find_solidity_files, read_file_content
+from solidity_scanner.utils import find_solidity_files
 
 
 class TestIntegration(unittest.TestCase):
@@ -27,10 +27,10 @@ class TestIntegration(unittest.TestCase):
             f.write(
                 """
             pragma solidity ^0.7.0;
-            
+
             contract Vulnerable {
                 mapping(address => uint256) public balances;
-                
+
                 function withdraw(uint256 amount) public {
                     require(balances[msg.sender] >= amount);
                     msg.sender.call{value: amount}("");
@@ -68,10 +68,10 @@ class TestIntegration(unittest.TestCase):
             f.write(
                 """
             pragma solidity ^0.8.0;
-            
+
             contract Safe {
                 mapping(address => uint256) public balances;
-                
+
                 function withdraw(uint256 amount) public {
                     require(balances[msg.sender] >= amount);
                     balances[msg.sender] -= amount;
@@ -103,7 +103,7 @@ class TestIntegration(unittest.TestCase):
             f.write(
                 """
             pragma solidity ^0.7.0;
-            
+
             contract Test {
                 function test() public {
                     // Some code
@@ -130,7 +130,7 @@ class TestIntegration(unittest.TestCase):
                     f.write(
                         f"""
                     pragma solidity ^0.8.0;
-                    
+
                     contract Test{i} {{
                         function test() public {{}}
                     }}
@@ -155,10 +155,10 @@ class TestIntegration(unittest.TestCase):
         """Test all detectors working together."""
         source = """
         pragma solidity ^0.7.0;
-        
+
         contract Test {
             mapping(address => uint256) public balances;
-            
+
             function withdraw(uint256 amount) public {
                 require(balances[msg.sender] >= amount);
                 msg.sender.call{value: amount}("");

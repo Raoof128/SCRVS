@@ -1,7 +1,6 @@
 """Tests for validation detector."""
 
 import unittest
-from pathlib import Path
 
 from solidity_scanner.detectors.validation import ValidationDetector
 from solidity_scanner.parser import SolidityParser
@@ -14,7 +13,7 @@ class TestValidationDetector(unittest.TestCase):
         """Test detection of missing input validation."""
         source = """
         pragma solidity ^0.7.0;
-        
+
         contract Test {
             function setValue(uint256 value) public {
                 // Missing require() check
@@ -36,7 +35,7 @@ class TestValidationDetector(unittest.TestCase):
         """Test detection of hardcoded addresses."""
         source = """
         pragma solidity ^0.7.0;
-        
+
         contract Test {
             address constant ADMIN = 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb0;
         }
@@ -55,7 +54,7 @@ class TestValidationDetector(unittest.TestCase):
         """Test detection of unsafe arithmetic."""
         source = """
         pragma solidity ^0.7.0;
-        
+
         contract Test {
             function add(uint256 a, uint256 b) public pure returns (uint256) {
                 return a + b;  // No overflow check
@@ -69,11 +68,9 @@ class TestValidationDetector(unittest.TestCase):
         detector = ValidationDetector()
         findings = detector.detect(contracts, source, "test.sol")
 
-        arithmetic_findings = [
-            f for f in findings if "Overflow" in f.title or "Underflow" in f.title
-        ]
         # May or may not detect depending on implementation
         # This test verifies the detector runs without errors
+        self.assertIsInstance(findings, list)
 
 
 if __name__ == "__main__":

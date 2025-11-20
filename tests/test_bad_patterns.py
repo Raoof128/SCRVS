@@ -13,7 +13,7 @@ class TestBadPatternsDetector(unittest.TestCase):
         """Test detection of insecure randomness."""
         source = """
         pragma solidity ^0.7.0;
-        
+
         contract Test {
             function random() public view returns (uint256) {
                 return uint256(keccak256(abi.encodePacked(block.timestamp)));
@@ -34,7 +34,7 @@ class TestBadPatternsDetector(unittest.TestCase):
         """Test detection of tx.origin usage."""
         source = """
         pragma solidity ^0.7.0;
-        
+
         contract Test {
             function admin() public {
                 require(tx.origin == owner);

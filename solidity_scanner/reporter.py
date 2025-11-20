@@ -12,8 +12,7 @@ import csv
 import json
 import logging
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from .detectors.base import Finding
 from .utils import get_severity_color
@@ -79,7 +78,7 @@ class Reporter:
                         print(f"\n  Recommendation:\n  {finding.recommendation}")
 
         print("\n" + "=" * 80)
-        print(f"\n\033[1mSummary:\033[0m")
+        print("\n\033[1mSummary:\033[0m")
         self._print_summary(filtered_findings)
 
     def _filter_findings(self, critical_only: bool) -> List[Finding]:
@@ -194,7 +193,8 @@ class Reporter:
         high_count = summary.get("HIGH", 0)
 
         lines.append(
-            f"This audit identified **{total}** security findings across the analyzed smart contract."
+            f"This audit identified **{total}** security findings "
+            f"across the analyzed smart contract."
         )
         lines.append("")
         lines.append("### Severity Breakdown")
@@ -209,7 +209,8 @@ class Reporter:
 
         if critical_count > 0 or high_count > 0:
             lines.append(
-                f"⚠️ **{critical_count + high_count} critical/high severity issues** require immediate attention."
+                f"⚠️ **{critical_count + high_count} critical/high severity issues** "
+                f"require immediate attention."
             )
             lines.append("")
 
@@ -229,7 +230,7 @@ class Reporter:
                 if finding.function_name:
                     lines.append(f"**Function:** `{finding.function_name}`")
                 lines.append("")
-                lines.append(f"**Description:**")
+                lines.append("**Description:**")
                 lines.append("")
                 lines.append(finding.description)
                 lines.append("")
@@ -292,10 +293,12 @@ class Reporter:
         lines.append("## General Recommendations")
         lines.append("")
         lines.append(
-            "1. **Follow CEI Pattern**: Always update state (Effects) before making external calls (Interactions)"
+            "1. **Follow CEI Pattern**: Always update state (Effects) "
+            "before making external calls (Interactions)"
         )
         lines.append(
-            "2. **Use Reentrancy Guards**: Implement and use `nonReentrant` modifiers from OpenZeppelin"
+            "2. **Use Reentrancy Guards**: Implement and use `nonReentrant` "
+            "modifiers from OpenZeppelin"
         )
         lines.append("3. **Input Validation**: Validate all inputs with `require()` statements")
         lines.append("4. **Access Control**: Protect admin functions with proper modifiers")
