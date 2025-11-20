@@ -88,19 +88,41 @@ jobs:
       
       - name: Test CLI scan command
         run: |
+          set +e  # Don't exit on error
           python -m solidity_scanner.cli scan examples/vulnerable.sol --critical-only
-          test $? -eq 1 || exit 1
+          SCAN_EXIT=$?
+          # Exit code 1 is expected for vulnerable contracts (vulnerabilities found)
+          # Exit code 0 would mean no critical/high vulnerabilities (unexpected for vulnerable.sol)
+          if [ $SCAN_EXIT -ne 1 ]; then
+            echo "ERROR: Expected exit code 1 for vulnerable contract, got $SCAN_EXIT"
+            exit 1
+          fi
+          echo "✓ Scan command correctly returned exit code 1 (vulnerabilities found)"
       
       - name: Test CLI score command
         run: |
           python -m solidity_scanner.cli score examples/vulnerable.sol
-          test $? -eq 0 || exit 1
+          if [ $? -ne 0 ]; then
+            echo "ERROR: Score command failed"
+            exit 1
+          fi
+          echo "✓ Score command succeeded"
       
       - name: Verify reports generated
         run: |
-          test -f vulnerable_report.json || exit 1
-          test -f vulnerable_findings.csv || exit 1
-          test -f vulnerable_security_audit.md || exit 1
+          if [ ! -f vulnerable_report.json ]; then
+            echo "ERROR: vulnerable_report.json not found"
+            exit 1
+          fi
+          if [ ! -f vulnerable_findings.csv ]; then
+            echo "ERROR: vulnerable_findings.csv not found"
+            exit 1
+          fi
+          if [ ! -f vulnerable_security_audit.md ]; then
+            echo "ERROR: vulnerable_security_audit.md not found"
+            exit 1
+          fi
+          echo "✓ All reports generated successfully"
 
   security:
     name: Security Scan

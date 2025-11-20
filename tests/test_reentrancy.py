@@ -2,13 +2,14 @@
 
 import unittest
 from pathlib import Path
-from solidity_scanner.parser import SolidityParser
+
 from solidity_scanner.detectors.reentrancy import ReentrancyDetector
+from solidity_scanner.parser import SolidityParser
 
 
 class TestReentrancyDetector(unittest.TestCase):
     """Test cases for ReentrancyDetector."""
-    
+
     def test_detect_reentrancy_vulnerability(self):
         """Test detection of reentrancy vulnerability."""
         source = """
@@ -24,17 +25,17 @@ class TestReentrancyDetector(unittest.TestCase):
             }
         }
         """
-        
+
         parser = SolidityParser(source)
         contracts = parser.parse()
-        
+
         detector = ReentrancyDetector()
         findings = detector.detect(contracts, source, "test.sol")
-        
+
         # Should detect reentrancy vulnerability
-        reentrancy_findings = [f for f in findings if 'Reentrancy' in f.title]
+        reentrancy_findings = [f for f in findings if "Reentrancy" in f.title]
         self.assertGreater(len(reentrancy_findings), 0)
-    
+
     def test_detect_missing_guard(self):
         """Test detection of missing reentrancy guard."""
         source = """
@@ -50,17 +51,17 @@ class TestReentrancyDetector(unittest.TestCase):
             }
         }
         """
-        
+
         parser = SolidityParser(source)
         contracts = parser.parse()
-        
+
         detector = ReentrancyDetector()
         findings = detector.detect(contracts, source, "test.sol")
-        
+
         # Should detect missing guard
-        guard_findings = [f for f in findings if 'Guard' in f.title]
+        guard_findings = [f for f in findings if "Guard" in f.title]
         self.assertGreater(len(guard_findings), 0)
-    
+
     def test_detect_deprecated_calls(self):
         """Test detection of deprecated call patterns."""
         source = """
@@ -76,17 +77,17 @@ class TestReentrancyDetector(unittest.TestCase):
             }
         }
         """
-        
+
         parser = SolidityParser(source)
         contracts = parser.parse()
-        
+
         detector = ReentrancyDetector()
         findings = detector.detect(contracts, source, "test.sol")
-        
+
         # Should detect deprecated patterns
-        deprecated_findings = [f for f in findings if 'Deprecated' in f.title]
+        deprecated_findings = [f for f in findings if "Deprecated" in f.title]
         self.assertGreater(len(deprecated_findings), 0)
-    
+
     def test_safe_contract_passes(self):
         """Test that safe contract doesn't trigger false positives."""
         source = """
@@ -106,19 +107,18 @@ class TestReentrancyDetector(unittest.TestCase):
             }
         }
         """
-        
+
         parser = SolidityParser(source)
         contracts = parser.parse()
-        
+
         detector = ReentrancyDetector()
         findings = detector.detect(contracts, source, "test.sol")
-        
+
         # Should have fewer findings (CEI violation might still be detected
         # depending on implementation, but guard should be present)
-        critical_findings = [f for f in findings if f.severity == 'CRITICAL']
+        critical_findings = [f for f in findings if f.severity == "CRITICAL"]
         # Note: This test may need adjustment based on actual detection logic
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
-
